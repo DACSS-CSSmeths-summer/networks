@@ -373,9 +373,17 @@ and includes 3 sheets:</p>
 <ul>
 <li>Libraries needed</li>
 </ul>
-<pre class="r"><code>librariesNeeded=c(&quot;igraph&quot;,&quot;ggplot2&quot;,&quot;ggraph&quot;)
-librariesNeeded %in% rownames(installed.packages())</code></pre>
-<pre><code>## [1] TRUE TRUE TRUE</code></pre>
+<pre class="r"><code># Returns TRUE if installed, FALSE if not
+# 1. Define the vector of packages you want to check
+packages_to_check &lt;- c(&quot;igraph&quot;,&quot;ggplot2&quot;,&quot;ggraph&quot;,&quot;rio&quot;)
+
+# 2. Check all of them at once
+sapply(packages_to_check, requireNamespace, quietly = TRUE)</code></pre>
+<pre><code>##  igraph ggplot2  ggraph     rio 
+##    TRUE    TRUE    TRUE    TRUE</code></pre>
+<pre class="r"><code>###if needed
+
+# install.packages(c(&#39;igraph&#39;,&#39;ggraph&#39;))</code></pre>
 <ul>
 <li>Set seed</li>
 </ul>
@@ -405,7 +413,7 @@ attributes=rio::import(fileLink,which =&quot;attributes&quot;)</code></pre>
 <pre class="r"><code>EliteNet=graph_from_data_frame(edges, directed = F)
 
 summary(EliteNet)</code></pre>
-<pre><code>## IGRAPH 9ca1c91 UN-- 46 393 -- 
+<pre><code>## IGRAPH 37be9ec UN-- 46 393 -- 
 ## + attr: name (v/c)</code></pre>
 <ul>
 <li>From adjacency matrix:</li>
@@ -420,11 +428,11 @@ EliteNet=graph_from_adjacency_matrix(adjacencyMatrix,mode=&quot;undirected&quot;
 
 
 summary(EliteNet)</code></pre>
-<pre><code>## IGRAPH bbd5902 UN-- 46 393 -- 
+<pre><code>## IGRAPH fed292f UN-- 46 393 -- 
 ## + attr: name (v/c)</code></pre>
 <p>See inside:</p>
 <pre class="r"><code>V(EliteNet)</code></pre>
-<pre><code>## + 46/46 vertices, named, from bbd5902:
+<pre><code>## + 46/46 vertices, named, from fed292f:
 ##  [1] rachelerman     mattmcilwain    DaveParkerSEA   toddbishop     
 ##  [5] ashannstew      LeslieFeinzaig  akipman         matt_oppy      
 ##  [9] gilbert         juliesandler    BradSmi         crashdev       
@@ -437,7 +445,7 @@ summary(EliteNet)</code></pre>
 ## [37] Jenerationy     lanctot         Kristen_Hammy   nhuntwalker    
 ## + ... omitted several vertices</code></pre>
 <pre class="r"><code>E(EliteNet)</code></pre>
-<pre><code>## + 393/393 edges from bbd5902 (vertex names):
+<pre><code>## + 393/393 edges from fed292f (vertex names):
 ##  [1] rachelerman--mattmcilwain    rachelerman--DaveParkerSEA  
 ##  [3] rachelerman--toddbishop      rachelerman--ashannstew     
 ##  [5] rachelerman--LeslieFeinzaig  rachelerman--akipman        
@@ -467,7 +475,7 @@ V(EliteNet)$followers=attributes$followers
 # V(EliteNet)$followers
 # vertex_attr_names(EliteNet)
 summary(EliteNet)</code></pre>
-<pre><code>## IGRAPH bbd5902 UNW- 46 393 -- 
+<pre><code>## IGRAPH fed292f UNW- 46 393 -- 
 ## + attr: name (v/c), male (v/n), followers (v/n), weight (e/n)</code></pre>
 <p>You can use attributes to color nodes:</p>
 <pre class="r"><code>library(ggraph)</code></pre>
