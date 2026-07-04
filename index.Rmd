@@ -46,7 +46,7 @@ set.seed(123)
 ```{r}
 rm(list = ls())
 ##
-fileLink='https://github.com/DACSS-CSSmeths-winter/networkData/raw/main/seattleTop.xlsx'
+fileLink='https://github.com/DACSS-CSSmeths-summer/datafiles/raw/main/seattleTop.xlsx'
 
 edges=rio::import(fileLink, which = 'edges') 
 adjacency=rio::import(fileLink, which = 'adjacency')
@@ -116,7 +116,7 @@ summary(EliteNet)
 
 You can use attributes to color nodes:
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(ggraph)
 
 base=ggraph(graph = EliteNet)
@@ -226,7 +226,8 @@ for (index in seq(1:NodeCount)){
 
 ```
 
-```{r}
+We show here only the hub's names:
+```{r, message=F}
 library(ggraph)
 
 base=ggraph(graph = EliteNet)
@@ -269,6 +270,8 @@ ratio <- empirical_transitivity / mean(random_transitivities)
 ratio
 ```
 
+As it is greater than 1, we continue:
+
 ### 5.2 **Two approaches**
 
 a. Girvan-Newman:
@@ -277,7 +280,7 @@ a. Girvan-Newman:
 The **girvan_newman** algorithm is based on creating partitions using the centrality of nodes to create partition too. We can create something similar to the last result like this:
 
 
-```{r}
+```{r, warning=FALSE}
 # Membership vector will be selected based 
 # on the highest modularity score
 partition_girvanNewman_best <- cluster_edge_betweenness(EliteNet)
@@ -310,24 +313,28 @@ max(partition_louvain_optimal$modularity)
 
 ### 5.3 **Plotting communities**
 
-First, creating new columns:
+First, adding the community label to the nodes:
 
 ```{r}
 V(EliteNet)$louvain=as.factor(membership(partition_louvain_optimal))
+
 V(EliteNet)$girvanNewman=as.factor(membership(partition_girvanNewman_best))
 ```
 
-Now plot the one with the bet modularity:
+Now plot the one with the best modularity:
 
-```{r}
-base=ggraph(graph =EliteNet,layout = 'fr') + geom_edge_link(alpha=0.2)
-base + geom_node_point(aes(color=louvain), show.legend = T, size=4)
+```{r, message=FALSE}
+base=ggraph(graph =EliteNet) +
+          geom_edge_link(alpha=0.2)
+
+base + geom_node_point(aes(color=louvain), 
+                       show.legend = T, size=4)
 ```
 
 An alternative:
 
 ```{r}
-V(EliteNet)$degree = degree(EliteNet)
+V(EliteNet)$degree = degree(EliteNet) # first compute node degree and assign
 
 ggraph(EliteNet, layout = 'hive', 
        axis = louvain,
