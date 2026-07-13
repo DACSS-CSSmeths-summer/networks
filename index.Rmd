@@ -279,10 +279,13 @@ c. Get Transitivity ratio
 
 ```{r}
 ### Report
-
-cat("EliteNet transitivity:  ", empirical_transitivity, "\n")
-cat("Random-network mean:    ", mean_random_transitivities, "\n")
-cat("Ratio:                  ", empirical_transitivity / mean(random_transitivities), "\n\n")
+report_table <- data.frame(
+  Metric = c("EliteNet transitivity", "Random-network mean", "Ratio"),
+  Value  = round(c(empirical_transitivity,
+                    mean_random_transitivities,
+                    empirical_transitivity / mean_random_transitivities), 4)
+)
+knitr::kable(report_table)
 ```
 
 We should stop if the ratio were 1 or less. As it is not, we may continue:
@@ -444,32 +447,34 @@ ggraph(EliteNet, layout = 'hive',
   coord_fixed()
 ```
 
+
 ### 5.4 Was any of this real?
 
 The ratio table and heatmap were the first crack in the story: internal density was higher than external, but well under the 5:1 benchmark for real social communities. That's what started the doubt, not confirmed anything.
 
 The hive plot pushed the doubt further, from a different angle: it showed that a layout will draw confident, cleanly separated axes for *any* partition you hand it, real structure or not. Visually forcing communities onto radial spokes doesn't mean those communities earned their separation — it means hive layouts always look like this.
 
-So we close by asking the one question neither the ratio table nor the hive plot can answer on their own: is EliteNet's clustering actually higher than what a degree-matched random network would produce, or is the "community" story we've been telling just chance dressed up in color?
-
+So we close with the question neither the ratio table nor the hive plot can actually answer: not "is the ratio different from 1?", but "is it convincingly *greater* than 1?" A ratio of 1.0165 is technically above 1 — the real question is whether that's a genuine signal or just noise, which is exactly what the test below is built to check.
 
 ```{r}
 null_mean <- mean(random_transitivities)
 null_sd   <- sd(random_transitivities)
 z_score   <- (empirical_transitivity - null_mean) / null_sd
 count_exceeding <- sum(random_transitivities >= empirical_transitivity)
-p_value <- count_exceeding / replicates   
-decision_05 <- if (p_value < 0.05) "SIGNIFICANT" else "NOT significant"
-decision_01 <- if (p_value < 0.01) "SIGNIFICANT" else "NOT significant"
-cat("z-score:                 ", z_score, "\n")
-cat("Empirical p-value:       ", p_value, paste0("(", count_exceeding, "/", replicates, ")"), "\n")
-cat("alpha = 0.05 -->", decision_05, "\n")
-cat("alpha = 0.01 -->", decision_01, "\n")
+p_value <- count_exceeding / replicates
+test_table <- data.frame(
+  Alpha    = c(0.05, 0.01),
+  Z_score  = round(z_score, 3),
+  P_value  = sprintf("%.3f (%d/%d)", p_value, count_exceeding, replicates),
+  Decision = c(if (p_value < 0.05) "SIGNIFICANT" else "NOT significant",
+               if (p_value < 0.01) "SIGNIFICANT" else "NOT significant")
+)
+knitr::kable(test_table)
 ```
 
-The result: z = 1.33, p = 0.094 — not significant at either threshold. EliteNet's clustering is not distinguishable from what its degree sequence alone would produce by chance.
+The result: z = 1.33, p = 0.094 — not significant at either threshold. Recall the ratio table above: EliteNet's transitivity was only 1.0165× the random-network mean — a 1.65% gap. Once you account for how much the null distribution itself varies (its standard deviation), that 1.65% edge isn't distinguishable from noise. EliteNet's clustering is not distinguishable from what its degree sequence alone would produce by chance.
 
-This is the punchline for the whole section: the ratio table planted the first doubt, the hive plot showed how easily a visualization can paper over that doubt with confident colors and clean spokes, and the formal test confirms the doubt was right all along. That gap — between what a plot *suggests* and what a null model actually *supports* — is the habit worth keeping: always ask what a visualization would look like even if the pattern were pure noise, before trusting that it isn't.
+This is the punchline for the whole section: the ratio table planted the first doubt — 1.0165 is barely above 1, nowhere close to a convincing multiple — the hive plot then showed how easily a visualization can paper over that doubt with confident colors and clean spokes, and the formal test confirms the doubt was right all along. That gap — between what a plot *suggests* and what a null model actually *supports* — is the habit worth keeping: always ask what a visualization would look like even if the pattern were pure noise, before trusting that it isn't.
 
 Time to export:
 
